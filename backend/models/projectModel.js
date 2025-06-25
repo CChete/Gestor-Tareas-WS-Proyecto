@@ -1,12 +1,14 @@
 const { getConnection, sql } = require('../database');
 
+//modelo de proyectos 
 const ProjectModel = {
+        //metodo para mostrar todos los projectos creados
   async getAll() {
     const pool = await getConnection();
     const result = await pool.request().query('SELECT * FROM Projects');
     return result.recordset;
   },
-
+  //metodo para crear proyectos
   async create(project) {
     const pool = await getConnection();
     const result = await pool

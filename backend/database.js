@@ -1,6 +1,7 @@
 require('dotenv').config();
 const sql = require('mssql');
 
+//conexion con la base de datos atravez del archivo .env en local usando variables de entorno
 const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASS,

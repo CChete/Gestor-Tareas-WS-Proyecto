@@ -1,6 +1,7 @@
 const { getConnection, sql } = require('../database');
-
+//modelo de Usuarios
 const UserModel = {
+    //metodo para verificar si un usuario existe
   async exists(userId) {
     const pool = await getConnection();
     const result = await pool

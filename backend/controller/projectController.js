@@ -1,5 +1,5 @@
-const ProjectModel = require('../models/projectModel');
-const UserModel = require('../models/userModel');
+const ProjectModel = require('../models/projectModel');//importacion del modelo de Proyecto
+const UserModel = require('../models/userModel');  //importacion del modelo de Usuario
 
 const projectController = {
   async create(req, res) {

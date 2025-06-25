@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const taskRoutes = require('./routes/taskRoutes');
-const projectRoutes = require('./routes/projectRoutes');
+const taskRoutes = require('./routes/taskRoutes');//importacion de las rutas de tareas
+const projectRoutes = require('./routes/projectRoutes');//importacion de las rutas de proyectos
 
 const app = express();
 

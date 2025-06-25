@@ -1,4 +1,4 @@
-const TaskModel = require('../models/taskModel');
+const TaskModel = require('../models/taskModel');//importacion del modelo de tarea
 
 const taskController = {
   async getAll(req, res) {
@@ -29,7 +29,7 @@ const taskController = {
     }
   },
 
-  // Agrega update y delete según avances
+  // Agregar update y delete según avances
 };
 
 module.exports = taskController;

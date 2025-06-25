@@ -1,13 +1,14 @@
 const { getConnection, sql } = require('../database');
 
-// Modelo de Tarea (solo ejemplos básicos)
+// Modelo de Tarea
 const TaskModel = {
+    //metodo para mostrar todas las tareas
   async getAll() {
     const pool = await getConnection();
     const result = await pool.request().query('SELECT * FROM Tasks');
     return result.recordset;
   },
-
+    //metodo para mostrar las tareas por id especifico
   async getById(id) {
     const pool = await getConnection();
     const result = await pool
@@ -16,7 +17,7 @@ const TaskModel = {
       .query('SELECT * FROM Tasks WHERE TaskID = @id');
     return result.recordset[0];
   },
-
+    //metodo para crear una tarea nueva 
   async create(task) {
     const pool = await getConnection();
     const result = await pool
