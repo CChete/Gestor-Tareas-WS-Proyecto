@@ -1,0 +1,118 @@
+CREATE DATABASE TaskManagerDB;
+GO
+
+USE TaskManagerDB;
+GO
+
+-- Tabla de Usuarios
+CREATE TABLE Users (
+    UserID INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    Email NVARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash VARBINARY(MAX) NOT NULL,
+    PasswordSalt VARBINARY(MAX) NOT NULL,
+    Role NVARCHAR(20) NOT NULL DEFAULT 'user' 
+        CHECK (Role IN ('user', 'admin', 'manager')),
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    LastLogin DATETIME,
+    IsActive BIT NOT NULL DEFAULT 1
+);
+GO
+
+-- Tabla de Proyectos
+CREATE TABLE Projects (
+    ProjectID INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL,
+    Description NVARCHAR(MAX),
+    OwnerID INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    StartDate DATE,
+    EndDate DATE,
+    Status NVARCHAR(20) NOT NULL 
+        CHECK (Status IN ('active', 'paused', 'completed', 'archived')) 
+        DEFAULT 'active',
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- Tabla de Tareas
+CREATE TABLE Tasks (
+    TaskID INT IDENTITY(1,1) PRIMARY KEY,
+    Title NVARCHAR(100) NOT NULL,
+    Description NVARCHAR(MAX),
+    Status NVARCHAR(20) NOT NULL 
+        CHECK (Status IN ('pending', 'in-progress', 'completed', 'archived')) 
+        DEFAULT 'pending',
+    Priority NVARCHAR(20) NOT NULL 
+        CHECK (Priority IN ('low', 'medium', 'high', 'critical')) 
+        DEFAULT 'medium',
+    DueDate DATETIME,
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    UpdatedAt DATETIME,
+    CreatedBy INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    AssignedTo INT FOREIGN KEY REFERENCES Users(UserID),
+    ProjectID INT FOREIGN KEY REFERENCES Projects(ProjectID)
+);
+GO
+
+-- Tabla de Comentarios
+CREATE TABLE Comments (
+    CommentID INT IDENTITY(1,1) PRIMARY KEY,
+    TaskID INT NOT NULL FOREIGN KEY REFERENCES Tasks(TaskID),
+    UserID INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    Content NVARCHAR(MAX) NOT NULL,
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    IsEdited BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- Tabla de Registro de Actividades
+CREATE TABLE ActivityLogs (
+    LogID INT IDENTITY(1,1) PRIMARY KEY,
+    ActionType NVARCHAR(50) NOT NULL,
+    EntityType NVARCHAR(50) NOT NULL,
+    EntityID INT NOT NULL,
+    UserID INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    Timestamp DATETIME NOT NULL DEFAULT GETDATE(),
+    Details NVARCHAR(MAX)
+);
+GO
+
+-- Tabla de Adjuntos
+CREATE TABLE Attachments (
+    AttachmentID INT IDENTITY(1,1) PRIMARY KEY,
+    TaskID INT NOT NULL FOREIGN KEY REFERENCES Tasks(TaskID),
+    UserID INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    FileName NVARCHAR(255) NOT NULL,
+    FilePath NVARCHAR(MAX) NOT NULL,
+    FileType NVARCHAR(50) NOT NULL,
+    FileSize BIGINT NOT NULL,
+    UploadedAt DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- Tabla de Relación Usuario-Proyecto
+CREATE TABLE ProjectMembers (
+    ProjectID INT NOT NULL FOREIGN KEY REFERENCES Projects(ProjectID),
+    UserID INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    Role NVARCHAR(20) NOT NULL DEFAULT 'member' 
+        CHECK (Role IN ('member', 'manager')),
+    JoinedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    PRIMARY KEY (ProjectID, UserID)
+);
+GO
+
+-- Tabla de Etiquetas
+CREATE TABLE Tags (
+    TagID INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(50) NOT NULL UNIQUE,
+    Color CHAR(7) NOT NULL DEFAULT '#6c757d'
+);
+GO
+
+-- Tabla de Relación Tarea-Etiqueta
+CREATE TABLE TaskTags (
+    TaskID INT NOT NULL FOREIGN KEY REFERENCES Tasks(TaskID),
+    TagID INT NOT NULL FOREIGN KEY REFERENCES Tags(TagID),
+    PRIMARY KEY (TaskID, TagID)
+);
+GO
