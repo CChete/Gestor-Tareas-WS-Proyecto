@@ -7,7 +7,7 @@ export function AuthProvider({ children }) {
 
   // Simulación de login
   const login = async (username, password) => {
-    // Aquí iría una petición real a tu backend
+    // agregar peticiones a backend
     // Demo: usuario admin/admin o user/user
     if (username === "admin" && password === "admin") {
       setUser({ username, role: "admin" });

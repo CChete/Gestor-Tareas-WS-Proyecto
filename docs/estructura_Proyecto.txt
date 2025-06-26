@@ -1,0 +1,35 @@
+GESTOR-TAREAS-WEB/
+│
+├── backend/
+│   ├── controller/
+│   ├── models/
+│   ├── routes/
+│   ├── websocket/
+│   ├── app.js
+│   ├── database.js
+│   ├── package.json
+│   ├── package-lock.json
+│   └── .env
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── context/
+│   │   ├── App.js
+│   │   └── index.js
+│   ├── package.json
+│   ├── package-lock.json
+│   └── .gitignore
+│
+├── basededatos/
+│   └── EntidadRelacionBD
+│
+├── docs/
+│   │── DIA1y2.md
+│   └── DIA3.md
+│
+├── .gitignore
+├── README.md
