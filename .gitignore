@@ -1,0 +1,12 @@
+# Node
+backend/node_modules/
+frontend/node_modules/
+# Dotenv
+backend/.env
+frontend/.env
+# Build
+frontend/build/
+backend/build/
+# Editor/IDE
+.vscode/
+.DS_Store

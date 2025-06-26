@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestor de Proyectos</title>
+  <style>
+    body { font-family: Arial; margin: 2em; }
+    input, button, select { margin: 0.2em; }
+    .error { color: red; }
+    .success { color: green; }
+    table { border-collapse: collapse; margin-top: 1em;}
+    th, td { border: 1px solid #ccc; padding: 0.5em;}
+  </style>
+</head>
+<body>
+  <h1>Gestor de Proyectos (Demo)</h1>
+  
+  <section>
+    <h2>Proyectos</h2>
+    <form id="formProyecto">
+      <input type="text" name="Name" placeholder="Nombre" required>
+      <input type="text" name="Description" placeholder="Descripción">
+      <input type="number" name="OwnerID" placeholder="OwnerID" required>
+      <input type="date" name="StartDate">
+      <input type="date" name="EndDate">
+      <button type="submit">Agregar Proyecto</button>
+    </form>
+    <div id="msgProyecto"></div>
+    <table id="tablaProyectos">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>OwnerID</th>
+          <th>Fechas</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Tareas</h2>
+    <form id="formTarea">
+      <input type="text" name="Title" placeholder="Título" required>
+      <input type="text" name="Description" placeholder="Descripción">
+      <select name="Status" required>
+        <option value="pending">Pendiente</option>
+        <option value="in-progress">En progreso</option>
+        <option value="completed">Completada</option>
+      </select>
+      <select name="Priority" required>
+        <option value="low">Baja</option>
+        <option value="medium" selected>Media</option>
+        <option value="high">Alta</option>
+      </select>
+      <input type="date" name="DueDate">
+      <input type="number" name="CreatedBy" placeholder="Creado por (UserID)" required>
+      <input type="number" name="AssignedTo" placeholder="Asignado a (UserID)">
+      <input type="number" name="ProjectID" placeholder="ProjectID" required>
+      <button type="submit">Agregar Tarea</button>
+    </form>
+    <div id="msgTarea"></div>
+    <table id="tablaTareas">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Descripcion</th>
+          <th>Status</th>
+          <th>Prioridad</th>
+          <th>Proyecto</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <script>
+    // se usa local host en pruebas locales cambiar segun implementacion real
+    const API = "http://localhost:3000/api";
+
+    // --- Proyectos ---
+    async function cargarProyectos() {
+      const res = await fetch(`${API}/projects`);
+      const proyectos = await res.json();
+      const tbody = document.querySelector("#tablaProyectos tbody");
+      tbody.innerHTML = "";
+      proyectos.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.ProjectID}</td><td>${p.Name}</td><td>${p.OwnerID}</td><td>${p.StartDate || ""} - ${p.EndDate || ""}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("formProyecto").addEventListener("submit", async e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target));
+      document.getElementById("msgProyecto").textContent = "";
+      try {
+        const res = await fetch(`${API}/projects`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (res.ok) {
+          document.getElementById("msgProyecto").textContent = "Proyecto creado correctamente";
+          document.getElementById("msgProyecto").className = "success";
+          e.target.reset();
+          cargarProyectos();
+        } else {
+          document.getElementById("msgProyecto").textContent = result.error || "Error";
+          document.getElementById("msgProyecto").className = "error";
+        }
+      } catch (err) {
+        document.getElementById("msgProyecto").textContent = "Error de conexión";
+        document.getElementById("msgProyecto").className = "error";
+      }
+    });
+
+    // --- Tareas ---
+    async function cargarTareas() {
+      const res = await fetch(`${API}/tasks`);
+      const tareas = await res.json();
+      const tbody = document.querySelector("#tablaTareas tbody");
+      tbody.innerHTML = "";
+      tareas.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${t.TaskID}</td><td>${t.Title}</td><td>${t.Description}</td><td>${t.Status}</td><td>${t.Priority}</td><td>${t.ProjectID}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("formTarea").addEventListener("submit", async e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target));
+      document.getElementById("msgTarea").textContent = "";
+      try {
+        const res = await fetch(`${API}/tasks`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (res.ok) {
+          document.getElementById("msgTarea").textContent = "Tarea creada correctamente";
+          document.getElementById("msgTarea").className = "success";
+          e.target.reset();
+          cargarTareas();
+        } else {
+          document.getElementById("msgTarea").textContent = result.error || "Error";
+          document.getElementById("msgTarea").className = "error";
+        }
+      } catch (err) {
+        document.getElementById("msgTarea").textContent = "Error de conexión";
+        document.getElementById("msgTarea").className = "error";
+      }
+    });
+
+    // Inicializa las tablas al cargar la página
+    cargarProyectos();
+    cargarTareas();
+  </script>
+</body>
+</html>
