@@ -9,8 +9,8 @@ CREATE TABLE Users (
     UserID INT IDENTITY(1,1) PRIMARY KEY,
     Username NVARCHAR(50) NOT NULL UNIQUE,
     Email NVARCHAR(100) NOT NULL UNIQUE,
-    PasswordHash VARBINARY(MAX) NOT NULL,
-    PasswordSalt VARBINARY(MAX) NOT NULL,
+    PasswordHash NVARCHAR(255) NOT NULL,
+    PasswordSalt NVARCHAR(255) NOT NULL,
     Role NVARCHAR(20) NOT NULL DEFAULT 'user' 
         CHECK (Role IN ('user', 'admin', 'manager')),
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
