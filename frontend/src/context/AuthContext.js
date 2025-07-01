@@ -1,25 +1,37 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // { username, role }
+  const [user, setUser] = useState(null);
 
-  // Simulación de login
+  // funcion de login
   const login = async (username, password) => {
-    // agregar peticiones a backend
-    // Demo: usuario admin/admin o user/user
-    if (username === "admin" && password === "admin") {
-      setUser({ username, role: "admin" });
+    try {
+      const res = await fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: username, password }) // email es el usuario según backend
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        return { success: false, message: err.error || "Login incorrecto" };
+      }
+
+      const data = await res.json();
+      localStorage.setItem("token", data.token);
+      setUser(data.user);
       return { success: true };
-    } else if (username === "user" && password === "user") {
-      setUser({ username, role: "user" });
-      return { success: true };
+    } catch (error) {
+      return { success: false, message: "Error de red o servidor" };
     }
-    return { success: false, message: "Credenciales inválidas" };
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

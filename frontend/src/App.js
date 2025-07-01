@@ -15,25 +15,27 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Navbar />
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={
-            <PrivateRoute><DashboardPage /></PrivateRoute>
-          } />
-          <Route path="/projects" element={
-            <PrivateRoute><ProjectsPage /></PrivateRoute>
-          } />
-          <Route path="/tasks" element={
-            <PrivateRoute><TasksPage /></PrivateRoute>
-          } />
-          <Route path="/admin" element={
-            <PrivateRoute roles={["admin"]}><AdminPage /></PrivateRoute>
-          } />
-          <Route path="/profile" element={
-            <PrivateRoute><UserProfilePage /></PrivateRoute>
-          } />
-          <Route path="*" element={<div>404 Not Found</div>} />
-        </Routes>
+        <div style={{ marginLeft: "180px", padding: "24px" }}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/" element={
+              <PrivateRoute><DashboardPage /></PrivateRoute>
+            } />
+            <Route path="/projects" element={
+              <PrivateRoute><ProjectsPage /></PrivateRoute>
+            } />
+            <Route path="/tasks" element={
+              <PrivateRoute><TasksPage /></PrivateRoute>
+            } />
+            <Route path="/admin" element={
+              <PrivateRoute roles={["admin"]}><AdminPage /></PrivateRoute>
+            } />
+            <Route path="/profile" element={
+              <PrivateRoute><UserProfilePage /></PrivateRoute>
+            } />
+            <Route path="*" element={<div>404 Not Found</div>} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </AuthProvider>
   );
