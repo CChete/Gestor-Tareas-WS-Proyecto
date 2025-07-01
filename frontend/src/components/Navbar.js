@@ -1,21 +1,47 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "./Navbar.css";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
-    <nav>
-      <Link to="/">Inicio</Link>
-      <Link to="/projects">Proyectos</Link>
-      <Link to="/tasks">Tareas</Link>
-      {user?.role === "admin" && <Link to="/admin">Admin</Link>}
-      <Link to="/profile">Mi Perfil</Link>
-      {user ? (
-        <button onClick={logout}>Salir ({user.username})</button>
-      ) : (
-        <Link to="/login">Login</Link>
+    <aside className="sidebar">
+      <nav>
+        <ul>
+          <li>
+            <NavLink to="/" end>
+              Inicio
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/projects">Proyectos</NavLink>
+          </li>
+          <li>
+            <NavLink to="/tasks">Tareas</NavLink>
+          </li>
+          {user && user.role === "admin" && (
+            <li>
+              <NavLink to="/admin">Admin</NavLink>
+            </li>
+          )}
+          <li>
+            <NavLink to="/profile">Mi Perfil</NavLink>
+          </li>
+        </ul>
+      </nav>
+      {user && (
+        <button className="logout-btn" onClick={handleLogout}>
+          Salir ({user.role})
+        </button>
       )}
-    </nav>
+    </aside>
   );
 }

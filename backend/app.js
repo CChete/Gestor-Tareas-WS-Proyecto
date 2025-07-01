@@ -14,19 +14,19 @@ app.use(express.json());
 // Rutas públicas (login, register, etc.)
 app.use('/api', authRoutes);
 
-// Rutas principales (requieren autenticación si así lo decides)
-app.use('/api/tasks', taskRoutes);
-app.use('/api/projects', projectRoutes);
+// Rutas principales (requieren autenticación)
+app.use('/api/tasks', authenticateToken, taskRoutes);//authenticateToken restringe el acceso a las rutas solo permite acceder con el token de inicio de sesion
+app.use('/api/projects', authenticateToken, projectRoutes);
 
 app.get('/', (req, res) => {
   res.send('API gestor de tareas activo');
 });
 
-// Rutas de prueba protegidas
+// Rutas de prueba protegidas ruta de prueba para prueba de la autenticacion
 app.get('/api/protegido', authenticateToken, (req, res) => {
   res.json({ mensaje: "¡Acceso autorizado!", usuario: req.user });
 });
-
+// Rutas de prueba protegidas ruta de prueba para prueba de la autenticacion
 app.get('/api/solo-admin', authenticateToken, authorizeRoles(['admin']), (req, res) => {
   res.json({ mensaje: "¡Eres admin!" });
 });
