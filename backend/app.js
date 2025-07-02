@@ -4,9 +4,12 @@ const taskRoutes = require('./routes/taskRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const authRoutes = require('./routes/auth');
 const { authenticateToken, authorizeRoles } = require('./middleware/auth');
+const http = require('http');
+const socketInit = require('./websocket/socket'); // Importa módulo websocket
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);//se crea el server del websocket
 
 app.use(cors());
 app.use(express.json());
@@ -31,7 +34,10 @@ app.get('/api/solo-admin', authenticateToken, authorizeRoles(['admin']), (req, r
   res.json({ mensaje: "¡Eres admin!" });
 });
 
+// Inicializa socket.io
+socketInit(server);
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Servidor backend escuchando en puerto ${PORT}`);
 });

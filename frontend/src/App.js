@@ -9,12 +9,14 @@ import ProjectsPage from "./pages/Projects/ProjectsPage";
 import TasksPage from "./pages/Tasks/TasksPage";
 import AdminPage from "./pages/Admin/AdminPage";
 import UserProfilePage from "./pages/UserProfile/UserProfilePage";
+import SocketHandler from "./components/SocketHandler"; 
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Navbar />
+        <SocketHandler />
         <div style={{ marginLeft: "180px", padding: "24px" }}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
