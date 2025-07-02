@@ -1,5 +1,6 @@
 const ProjectModel = require('../models/projectModel');//importacion del modelo de Proyecto
 const UserModel = require('../models/userModel');  //importacion del modelo de Usuario
+const { io, connectedUsers } = require('../websocket/socket');
 
 const projectController = {
   async create(req, res) {
