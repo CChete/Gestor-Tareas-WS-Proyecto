@@ -67,6 +67,21 @@ export async function getTasks() {
   return res.json();
 }
 
+// Obtiene las tareas asignadas a un usuario
+export async function getTasksByUserId(userId) {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/tasks/${userId}`, {
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}` 
+    }
+  });
+  if (!response.ok) {
+    throw new Error("No se pudieron obtener las tareas");
+  }
+  return await response.json();
+}
+
 export async function createTask(data) {
   const token = localStorage.getItem("token"); //obtenemos el token para acceder a las rutas protegidas solamente al iniciar
 //sesion

@@ -43,7 +43,7 @@ const taskController = {
     }
   },
 
-  // Agregar update y delete según avances
+  
 };
 
 module.exports = taskController;

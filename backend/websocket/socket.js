@@ -6,7 +6,7 @@ const connectedUsers = {};
 module.exports = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "*", // O pon la URL real de tu frontend
+      origin: "*", 
       methods: ["GET", "POST"]
     }
   });

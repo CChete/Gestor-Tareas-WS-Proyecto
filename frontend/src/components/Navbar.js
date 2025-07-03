@@ -24,9 +24,21 @@ export default function Navbar() {
           <li>
             <NavLink to="/projects">Proyectos</NavLink>
           </li>
-          <li>
-            <NavLink to="/tasks">Tareas</NavLink>
-          </li>
+          {user && user.role === "admin" && (
+            <li>
+              <NavLink to="/tasks">Tareas</NavLink>
+            </li>
+          )}
+          {user && user.role === "user" && (
+            <li>
+              <NavLink to="/tasksUser">Tareas1</NavLink>
+            </li>
+          )}
+          {user && user.role === "manager" && (
+            <li>
+              <NavLink to="/tasksUser">Tareas1</NavLink>
+            </li>
+          )}
           {user && user.role === "admin" && (
             <li>
               <NavLink to="/admin">Admin</NavLink>

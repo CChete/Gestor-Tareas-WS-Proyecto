@@ -7,6 +7,7 @@ import LoginPage from "./pages/Login/LoginPage";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import ProjectsPage from "./pages/Projects/ProjectsPage";
 import TasksPage from "./pages/Tasks/TasksPage";
+import TasksUserPage from "./pages/Tasks/TaskPageUser";
 import AdminPage from "./pages/Admin/AdminPage";
 import UserProfilePage from "./pages/UserProfile/UserProfilePage";
 import SocketHandler from "./components/SocketHandler"; 
@@ -27,7 +28,10 @@ function App() {
               <PrivateRoute><ProjectsPage /></PrivateRoute>
             } />
             <Route path="/tasks" element={
-              <PrivateRoute><TasksPage /></PrivateRoute>
+              <PrivateRoute roles={["admin"]}><TasksPage /></PrivateRoute>
+            } />            
+            <Route path="/tasksUser" element={
+              <PrivateRoute roles={["user"]}><TasksUserPage /></PrivateRoute>
             } />
             <Route path="/admin" element={
               <PrivateRoute roles={["admin"]}><AdminPage /></PrivateRoute>

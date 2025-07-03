@@ -8,14 +8,14 @@ const TaskModel = {
     const result = await pool.request().query('SELECT * FROM Tasks');
     return result.recordset;
   },
-    //metodo para mostrar las tareas por id especifico
+    //metodo para mostrar las tareas por id especifico de usuario asignado a la tarea
   async getById(id) {
     const pool = await getConnection();
     const result = await pool
       .request()
       .input('id', sql.Int, id)
-      .query('SELECT * FROM Tasks WHERE TaskID = @id');
-    return result.recordset[0];
+      .query('SELECT * FROM Tasks WHERE AssignedTo = @id');
+    return result.recordset;
   },
     //metodo para crear una tarea nueva 
   async create(task) {
@@ -38,7 +38,7 @@ const TaskModel = {
     return result.recordset[0];
   },
 
-  // Agregar métodos faltantes
+  
 };
 
 module.exports = TaskModel;
