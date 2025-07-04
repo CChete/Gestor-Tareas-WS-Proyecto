@@ -1,27 +1,27 @@
-import { useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useNotification } from "../context/NotificationContext";
-import socket from "../services/socket";
+import { useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import socket from '../services/socket';
 
-export default function SocketHandler() {
+const SocketHandler = () => {
   const { user } = useAuth();
-  const { addNotification } = useNotification();
 
   useEffect(() => {
-    if (user) {
-      socket.connect();
-      socket.emit("register", user.id);
+    if (user?.id) {
+      // Registrar usuario en el socket
+      socket.emit('register', user.id);
+
+      // Opcional: Ping/pong de prueba
+      socket.on('pongTest', (msg) => {
+        console.log(msg);
+      });
     }
 
-    socket.on("taskChanged", (data) => {
-      addNotification(data.message);
-    });
-
     return () => {
-      socket.off("taskChanged");
-      socket.disconnect();
+      socket.off('pongTest');
     };
-  }, [user, addNotification]);
+  }, [user?.id]);
 
-  return null;
-}
+  return null; // Este componente no renderiza nada
+};
+
+export default SocketHandler;

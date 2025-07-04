@@ -116,3 +116,363 @@ CREATE TABLE TaskTags (
     PRIMARY KEY (TaskID, TagID)
 );
 GO
+
+--Triggers--
+
+CREATE OR ALTER TRIGGER tr_Tasks_ActivityLog
+ON Tasks
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @ActionType NVARCHAR(50);
+    DECLARE @UserId INT;
+    
+    -- Determinar el tipo de acción
+    IF EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted)
+        SET @ActionType = 'UPDATE';
+    ELSE IF EXISTS (SELECT * FROM inserted)
+        SET @ActionType = 'INSERT';
+    ELSE
+        SET @ActionType = 'DELETE';
+    
+    -- Obtener el usuario que realiza la acción (usamos el último usuario modificado como ejemplo)
+    SET @UserId = ISNULL((SELECT TOP 1 CreatedBy FROM inserted), 
+                        (SELECT TOP 1 CreatedBy FROM deleted));
+    
+    -- Registrar la actividad para operaciones INSERT y UPDATE
+    IF @ActionType IN ('INSERT', 'UPDATE')
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            @ActionType,
+            'Task',
+            i.TaskID,
+            @UserId,
+            JSON_QUERY((
+                SELECT 
+                    i.TaskID AS taskId,
+                    i.Title AS title,
+                    i.Status AS status,
+                    i.Priority AS priority,
+                    i.DueDate AS dueDate,
+                    i.AssignedTo AS assignedTo,
+                    i.ProjectID AS projectId,
+                    CASE 
+                        WHEN @ActionType = 'UPDATE' THEN 
+                            (SELECT 
+                                d.Title AS old_title,
+                                d.Status AS old_status,
+                                d.Priority AS old_priority,
+                                d.DueDate AS old_dueDate,
+                                d.AssignedTo AS old_assignedTo,
+                                d.ProjectID AS old_projectId
+                             FROM deleted d WHERE d.TaskID = i.TaskID FOR JSON PATH, WITHOUT_ARRAY_WRAPPER)
+                        ELSE NULL
+                    END AS oldValues
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM inserted i;
+    END
+    
+    -- Registrar la actividad para operaciones DELETE
+    ELSE IF @ActionType = 'DELETE'
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            'DELETE',
+            'Task',
+            d.TaskID,
+            @UserId,
+            JSON_QUERY((
+                SELECT 
+                    d.TaskID AS taskId,
+                    d.Title AS title,
+                    d.Status AS status,
+                    d.Priority AS priority,
+                    d.DueDate AS dueDate,
+                    d.AssignedTo AS assignedTo,
+                    d.ProjectID AS projectId
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM deleted d;
+    END
+END;
+GO
+
+CREATE OR ALTER TRIGGER tr_Projects_ActivityLog
+ON Projects
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @ActionType NVARCHAR(50);
+    DECLARE @UserId INT;
+    
+    -- Determinar el tipo de acción
+    IF EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted)
+        SET @ActionType = 'UPDATE';
+    ELSE IF EXISTS (SELECT * FROM inserted)
+        SET @ActionType = 'INSERT';
+    ELSE
+        SET @ActionType = 'DELETE';
+    
+    -- Obtener el usuario que realiza la acción (OwnerID)
+    SET @UserId = ISNULL((SELECT TOP 1 OwnerID FROM inserted), 
+                        (SELECT TOP 1 OwnerID FROM deleted));
+    
+    -- Registrar la actividad para operaciones INSERT y UPDATE
+    IF @ActionType IN ('INSERT', 'UPDATE')
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            @ActionType,
+            'Project',
+            i.ProjectID,
+            @UserId,
+            JSON_QUERY((
+                SELECT 
+                    i.ProjectID AS projectId,
+                    i.Name AS name,
+                    i.Status AS status,
+                    i.StartDate AS startDate,
+                    i.EndDate AS endDate,
+                    CASE 
+                        WHEN @ActionType = 'UPDATE' THEN 
+                            (SELECT 
+                                d.Name AS old_name,
+                                d.Status AS old_status,
+                                d.StartDate AS old_startDate,
+                                d.EndDate AS old_endDate
+                             FROM deleted d WHERE d.ProjectID = i.ProjectID FOR JSON PATH, WITHOUT_ARRAY_WRAPPER)
+                        ELSE NULL
+                    END AS oldValues
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM inserted i;
+    END
+    
+    -- Registrar la actividad para operaciones DELETE
+    ELSE IF @ActionType = 'DELETE'
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            'DELETE',
+            'Project',
+            d.ProjectID,
+            @UserId,
+            JSON_QUERY((
+                SELECT 
+                    d.ProjectID AS projectId,
+                    d.Name AS name,
+                    d.Status AS status,
+                    d.StartDate AS startDate,
+                    d.EndDate AS endDate
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM deleted d;
+    END
+END;
+GO
+
+CREATE OR ALTER TRIGGER tr_Users_ActivityLog
+ON Users
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @ActionType NVARCHAR(50);
+    
+    -- Determinar el tipo de acción
+    IF EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted)
+        SET @ActionType = 'UPDATE';
+    ELSE IF EXISTS (SELECT * FROM inserted)
+        SET @ActionType = 'INSERT';
+    ELSE
+        SET @ActionType = 'DELETE';
+    
+    -- Registrar la actividad para operaciones INSERT y UPDATE
+    IF @ActionType IN ('INSERT', 'UPDATE')
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            @ActionType,
+            'User',
+            i.UserID,
+            i.UserID, -- El usuario se registra a sí mismo
+            JSON_QUERY((
+                SELECT 
+                    i.UserID AS userId,
+                    i.Username AS username,
+                    i.Email AS email,
+                    i.Role AS role,
+                    i.IsActive AS isActive,
+                    CASE 
+                        WHEN @ActionType = 'UPDATE' THEN 
+                            (SELECT 
+                                d.Username AS old_username,
+                                d.Email AS old_email,
+                                d.Role AS old_role,
+                                d.IsActive AS old_isActive
+                             FROM deleted d WHERE d.UserID = i.UserID FOR JSON PATH, WITHOUT_ARRAY_WRAPPER)
+                        ELSE NULL
+                    END AS oldValues
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM inserted i;
+    END
+    
+    -- Registrar la actividad para operaciones DELETE
+    ELSE IF @ActionType = 'DELETE'
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            'DELETE',
+            'User',
+            d.UserID,
+            d.UserID, -- El usuario se registra a sí mismo
+            JSON_QUERY((
+                SELECT 
+                    d.UserID AS userId,
+                    d.Username AS username,
+                    d.Email AS email,
+                    d.Role AS role
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM deleted d;
+    END
+END;
+GO
+
+CREATE OR ALTER TRIGGER tr_Comments_ActivityLog
+ON Comments
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @ActionType NVARCHAR(50);
+    
+    -- Determinar el tipo de acción
+    IF EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted)
+        SET @ActionType = 'UPDATE';
+    ELSE IF EXISTS (SELECT * FROM inserted)
+        SET @ActionType = 'INSERT';
+    ELSE
+        SET @ActionType = 'DELETE';
+    
+    -- Registrar la actividad para operaciones INSERT y UPDATE
+    IF @ActionType IN ('INSERT', 'UPDATE')
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            @ActionType,
+            'Comment',
+            i.CommentID,
+            i.UserID,
+            JSON_QUERY((
+                SELECT 
+                    i.CommentID AS commentId,
+                    i.TaskID AS taskId,
+                    SUBSTRING(i.Content, 1, 100) AS contentPreview,
+                    i.IsEdited AS isEdited,
+                    CASE 
+                        WHEN @ActionType = 'UPDATE' THEN 
+                            (SELECT 
+                                SUBSTRING(d.Content, 1, 100) AS old_contentPreview,
+                                d.IsEdited AS old_isEdited
+                             FROM deleted d WHERE d.CommentID = i.CommentID FOR JSON PATH, WITHOUT_ARRAY_WRAPPER)
+                        ELSE NULL
+                    END AS oldValues
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM inserted i;
+    END
+    
+    -- Registrar la actividad para operaciones DELETE
+    ELSE IF @ActionType = 'DELETE'
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            'DELETE',
+            'Comment',
+            d.CommentID,
+            d.UserID,
+            JSON_QUERY((
+                SELECT 
+                    d.CommentID AS commentId,
+                    d.TaskID AS taskId,
+                    SUBSTRING(d.Content, 1, 100) AS contentPreview
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM deleted d;
+    END
+END;
+GO
+
+CREATE OR ALTER TRIGGER tr_ProjectMembers_ActivityLog
+ON ProjectMembers
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @ActionType NVARCHAR(50);
+    
+    -- Determinar el tipo de acción
+    IF EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted)
+        SET @ActionType = 'UPDATE';
+    ELSE IF EXISTS (SELECT * FROM inserted)
+        SET @ActionType = 'INSERT';
+    ELSE
+        SET @ActionType = 'DELETE';
+    
+    -- Registrar la actividad para operaciones INSERT y UPDATE
+    IF @ActionType IN ('INSERT', 'UPDATE')
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            @ActionType,
+            'ProjectMember',
+            i.ProjectID,
+            i.UserID, -- El usuario que realiza la acción es el mismo que se está añadiendo al proyecto
+            JSON_QUERY((
+                SELECT 
+                    i.ProjectID AS projectId,
+                    i.UserID AS memberId,
+                    i.Role AS role,
+                    CASE 
+                        WHEN @ActionType = 'UPDATE' THEN 
+                            (SELECT 
+                                d.Role AS old_role
+                             FROM deleted d WHERE d.ProjectID = i.ProjectID AND d.UserID = i.UserID FOR JSON PATH, WITHOUT_ARRAY_WRAPPER)
+                        ELSE NULL
+                    END AS oldValues
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM inserted i;
+    END
+    
+    -- Registrar la actividad para operaciones DELETE
+    ELSE IF @ActionType = 'DELETE'
+    BEGIN
+        INSERT INTO ActivityLogs (ActionType, EntityType, EntityID, UserID, Details)
+        SELECT 
+            'DELETE',
+            'ProjectMember',
+            d.ProjectID,
+            d.UserID,
+            JSON_QUERY((
+                SELECT 
+                    d.ProjectID AS projectId,
+                    d.UserID AS memberId,
+                    d.Role AS role
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ))
+        FROM deleted d;
+    END
+END;
+GO

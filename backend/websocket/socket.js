@@ -3,10 +3,13 @@ const { Server } = require("socket.io");
 // Mapeo para saber qué usuario está conectado a qué socket
 const connectedUsers = {};
 
-module.exports = (server) => {
+// Creamos un objeto para almacenar las exportaciones
+const socketExports = {};
+
+function setupSocket(server) {
   const io = new Server(server, {
     cors: {
-      origin: "*", 
+      origin: "*",
       methods: ["GET", "POST"]
     }
   });
@@ -14,20 +17,19 @@ module.exports = (server) => {
   io.on("connection", (socket) => {
     console.log("Nuevo cliente conectado:", socket.id);
 
-      // Evento de prueba
-  socket.on("pingTest", (msg) => {
-    console.log("Ping recibido del frontend:", msg);
-    socket.emit("pongTest", "¡Pong desde backend!");
-  });
+    // Evento de prueba
+    socket.on("pingTest", (msg) => {
+      console.log("Ping recibido del frontend:", msg);
+      socket.emit("pongTest", "¡Pong desde backend!");
+    });
 
-    // El frontend debe enviar el userId tras conectar
+    // Registro de usuario
     socket.on("register", (userId) => {
       connectedUsers[userId] = socket.id;
       console.log(`Usuario ${userId} registrado con socket ${socket.id}`);
     });
 
     socket.on("disconnect", () => {
-      // Elimina usuario desconectado
       for (const [userId, id] of Object.entries(connectedUsers)) {
         if (id === socket.id) {
           delete connectedUsers[userId];
@@ -38,7 +40,24 @@ module.exports = (server) => {
     });
   });
 
-  // Permite emitir eventos desde otros módulos
-  module.exports.io = io;
-  module.exports.connectedUsers = connectedUsers;
+  // Función para notificar cambios en tareas
+  function notifyTaskChange(userId, notification) {
+    if (connectedUsers[userId]) {
+      io.to(connectedUsers[userId]).emit("taskNotification", notification);
+      console.log(`Notificación enviada a usuario ${userId}`);
+    }
+  }
+
+  // Asignamos las exportaciones
+  socketExports.io = io;
+  socketExports.connectedUsers = connectedUsers;
+  socketExports.notifyTaskChange = notifyTaskChange;
+
+  return io;
+}
+
+// Exportamos todo correctamente
+module.exports = {
+  setupSocket,
+  ...socketExports
 };

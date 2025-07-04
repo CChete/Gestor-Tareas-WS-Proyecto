@@ -10,7 +10,7 @@ export default function TasksUserPage() {
   useEffect(() => {
     async function fetchTasks() {
       try {
-        // Obtén el usuario logueado desde localStorage (ajusta el campo si tu objeto usuario es diferente)
+        // Obtén el usuario logueado desde localStorage
         const user = JSON.parse(localStorage.getItem("user"));
         const userId = user?.id;
         if (!userId) {
