@@ -5,7 +5,8 @@ const projectRoutes = require('./routes/projectRoutes');
 const authRoutes = require('./routes/auth');
 const { authenticateToken, authorizeRoles } = require('./middleware/auth');
 const http = require('http');
-const socketInit = require('./websocket/socket'); // Importa módulo websocket
+const { setupSocket } = require('./websocket/socket');
+
 require('dotenv').config();
 
 const app = express();
@@ -35,7 +36,7 @@ app.get('/api/solo-admin', authenticateToken, authorizeRoles(['admin']), (req, r
 });
 
 // Inicializa socket.io
-socketInit(server);
+const io = setupSocket(server); // Esto reemplaza a socketInit(server)
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

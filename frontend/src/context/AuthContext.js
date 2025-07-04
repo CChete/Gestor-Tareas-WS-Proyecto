@@ -3,15 +3,18 @@ import React, { createContext, useContext, useState } from "react";
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  // funcion de login
+  // función de login
   const login = async (username, password) => {
     try {
       const res = await fetch("http://localhost:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: username, password }) // email es el usuario según backend
+        body: JSON.stringify({ email: username, password })
       });
 
       if (!res.ok) {
@@ -21,6 +24,7 @@ export function AuthProvider({ children }) {
 
       const data = await res.json();
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user)); // <--- importante
       setUser(data.user);
       return { success: true };
     } catch (error) {
@@ -30,6 +34,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user"); // <--- importante
     setUser(null);
   };
 
