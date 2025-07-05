@@ -1,9 +1,3 @@
-Gestor de tareas en tiempo real
-
-Gestor de tareas en tiempo real que notifica
-cambios a usuarios conectados sobre proyectos y tareas
-utilizando WebSocket.io backend Express js y frontend React
-
 # Gestor-Tareas-WS-Proyecto
 
 Gestor-Tareas-WS-Proyecto es una aplicación web para la gestión de tareas y proyectos, que incluye autenticación de usuarios, sistema de roles y comunicación en tiempo real mediante WebSockets. El proyecto está dividido en tres partes principales: **backend (Node.js/Express)**, **frontend (React)** y **base de datos SQL Server**.
@@ -19,9 +13,6 @@ Gestor-Tareas-WS-Proyecto es una aplicación web para la gestión de tareas y pr
 - [Uso](#uso)
 - [Autenticación y Seguridad](#autenticación-y-seguridad)
 - [WebSockets](#websockets)
-- [Dockerización](#dockerización)
-- [Contribuir](#contribuir)
-- [Licencia](#licencia)
 
 ---
 
@@ -53,8 +44,6 @@ Esta aplicación permite la administración de proyectos y tareas colaborativas,
 - SQL Server
 
 ### DevOps/Utilidades
-- Docker
-- docker-compose
 - nodemon
 
 ---
@@ -62,23 +51,41 @@ Esta aplicación permite la administración de proyectos y tareas colaborativas,
 ## Estructura del Proyecto
 
 ```
-Gestor-Tareas-WS-Proyecto/
+GESTOR-TAREAS-WEB/
 │
-├── backend/              # API REST y WebSocket (Node.js/Express)
-│   ├── src/
+├── backend/
+│   ├── controller/
+│   ├── models/
+│   ├── routes/
+│   ├── websocket/
+│   ├── app.js
+│   ├── database.js
 │   ├── package.json
-│   └── Dockerfile
+│   ├── package-lock.json
+│   └── .env
 │
-├── frontend/             # Aplicación React
+├── frontend/
+│   ├── public/
 │   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── context/
+│   │   ├── App.js
+│   │   └── index.js
 │   ├── package.json
-│   └── Dockerfile
+│   ├── package-lock.json
+│   └── .gitignore
 │
-├── database/             # (Opcional) Scripts SQL para la DB
-│   └── init.sql
+├── basededatos/
+│   └── EntidadRelacionBD
 │
-├── docker-compose.yml    # Orquestador de servicios
-└── README.md
+├── docs/
+│   │── DIA1y2.md
+│   └── DIA3.md
+│
+├── .gitignore
+├── README.md
 ```
 
 ---
@@ -101,7 +108,7 @@ cd Gestor-Tareas-WS-Proyecto
 ### 2. Configura la base de datos
 
 - Crea una base de datos en SQL Server.
-- Ejecuta los scripts en `/database/init.sql` para crear las tablas y datos iniciales.
+- Ejecuta los scripts en `/database/EntidadRelacionBD.sql` para crear las tablas y datos iniciales.
 - Configura el archivo `.env` del backend con tus credenciales de SQL Server.
 
 ### 3. Instala dependencias
@@ -164,43 +171,8 @@ npm run dev     # o npm start
 - El backend expone un servidor Socket.IO integrado con Express.
 - El frontend se conecta usando `socket.io-client` para recibir notificaciones de tareas y chat en tiempo real.
 
----
-
-## Dockerización
-
-Levanta todo el entorno (backend, frontend y base de datos) con un solo comando.
-
-### 1. Requisitos
-
-- Docker y Docker Compose instalados.
-
-### 2. Uso Básico
-
-```sh
-docker compose up --build
-```
-
-Esto levantará:
-- Un contenedor para SQL Server
-- Un contenedor para el backend
-- Un contenedor para el frontend
-
 ### 3. Variables de entorno
 
-- El backend y la base de datos se comunican internamente en la red de Docker.
 - Edita los archivos `.env` según sea necesario.
-
----
-
-## Contribuir
-
-¡Las contribuciones son bienvenidas!  
-Por favor abre un issue o pull request para sugerencias y mejoras.
-
----
-
-## Licencia
-
-Este proyecto está bajo la licencia MIT.
 
 ---
